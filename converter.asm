@@ -14,19 +14,20 @@ currentSystemMsg: .asciiz "Enter The Current System: "
 currentNumberMsg: .asciiz "Enter The Number: "
 newSystemMsg: .asciiz "Enter The New System: "
 outputMsg: .asciiz "\nThe Output Number: "
+resultMessage: .asciiz "The number in the new system: "
 
 .text
 
 main:
-	#la $a0, introductionMessage
-	#jal printMessage
+	la $a0, introductionMessage
+	jal printMessage
 	
 	# read current system base
-	#la $a0, currentSystemMsg
-	#jal printMessage
-	#li $v0, 5       
-	#syscall
-	#sw $v0, currentSystem
+	la $a0, currentSystemMsg
+	jal printMessage
+	li $v0, 5       
+	syscall
+	sw $v0, currentSystem
 	
 	la $a0, currentNumberMsg
 	jal printMessage
@@ -38,31 +39,37 @@ main:
     	
 
     	
-  # read new system base
-  #la $a0, newSystemMsg
-	#jal printMessage
-	#li $v0, 5           	
-	#syscall
-	#sw $v0, newSystem
+  	#read new system base
+  	la $a0, newSystemMsg
+	jal printMessage
+	li $v0, 5           	
+	syscall
+	sw $v0, newSystem
 	
-  
+  	#check the input        ## shel el comment w fix el checking bydrb
+  	#jal checking
   
 	# To decimal conversion
 	lw $a0, number	# argument 1
-  lw $a1, currentSystem	# argument 2
+  	lw $a1, currentSystem	# argument 2
 	jal otherToDecimal	# take result from $v0
 	
-  #Decimal To Other
-  lw $a0, $v0 
-  jal decimalToOther
-	
-  #move $a0, $v0
-	#li $v0, 1
-	#syscall
+ 	#Decimal To Other
+  	move $a0, $v0 
+  	jal decimalToOther
 
+	#print result
+	
+	#print result message
+	la $a0, resultMessage
+	jal printMessage
+	
+	#print new number
+	la $a0, result
+	jal printMessage
 	exit:
-		li $v0, 10
-		syscall
+	li $v0, 10
+	syscall
 
 
 # print function  
