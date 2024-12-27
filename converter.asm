@@ -1,4 +1,7 @@
 .data
+
+error_message_1: .asciiz " doesn’t belong to the "
+error_message_2: .asciiz " System."	
 	
 currentSystem: .word 16
 number:        .space 32
@@ -58,6 +61,47 @@ main:
 printMessage:
 	li $v0, 4
 	syscall
+	jr $ra
+checking:
+	comparing:
+		la $t1, number	# number string base address
+		li $t2, 0	# number offset (counter)
+		la $t3, digit_arr # array's base address
+		la $t4, currentSystem #load current system
+		add $t5, $t1, $t2	# adding offset to the base address
+		lb $t6, 0($t5)		# loading the char base+offset
+		beq $t6, '\n', loop_end	# string end condition
+		bgt $t6, '9', convert_alpha_for_checking
+		bgt $t6,'F',exit_if_not_belong
+		subi $t7, $t6, '0' 	# converting a char to integer
+		ble $t4,$t7,exit_if_not_belong #if the system is less than or equal to the digit exit
+		j comparing
+		
+	
+	exit_if_not_belong:
+		li $v0, 4
+		la $a0, number
+      		syscall
+		li $v0, 4
+		la $a0, error_message_1
+      		syscall
+      		
+      		li $v0, 1
+      		la $a0, currentSystem
+      		syscall
+      		
+		li $v0, 4
+		la $a0, error_message_2
+      		syscall
+		# exit
+	        li $v0, 10
+	        syscall
+	loop_end:
+		jr $ra
+	   
+	convert_alpha_for_checking:
+	subi $t7, $t6, 'A'
+	addi $t7, $t7, 10 
 	jr $ra
 
 otherToDecimal:
