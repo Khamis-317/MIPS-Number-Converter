@@ -1,11 +1,11 @@
 .data
 	
-currentSystem: .word
+currentSystem: .word 0
 number:        .space 32
-newSystem:     .word
+newSystem:     .word 0
 newNumber:     .asciiz
-digit_arr: .word
-
+digit_arr: .word 32
+result: .space 32
  
 introductionMessage: .asciiz "Hello, This is Numbering System Converter. Please enter the current system, number and new system: \n"
 currentSystemMsg: .asciiz "Enter The Current System: "
@@ -25,8 +25,35 @@ main:
 	li $a1, 32      		 # max length
 	syscall
     	
-	jal otherToDecimal
-    
+    	#output currentSystem input message
+    	la $a0, currentSystemMsg
+    	jal printMessage
+  
+    	
+    	#read current system of the number
+    	li $v0, 5
+    	syscall
+    	sw $v0, currentSystem
+    	
+    	#output newSystem input message
+    	la $a0, newSystemMsg
+    	jal printMessage
+  
+  	#read newSystem 
+  	li $v0, 5
+  	syscall
+  	sw $v0, newSystem
+    	
+    	
+	#jal otherToDecimal
+	
+	
+ 	li $a0, 61
+    	jal decimalToOther
+    	
+    	la $a0, result
+    	jal printMessage
+    	
 	# exit
 	li $v0, 10
 	syscall
@@ -87,4 +114,83 @@ convert_alpha:
 
 
 
-
+#Decimal to Other 
+decimalToOther:
+	
+	move $t1, $a0 #decimal number
+	la $t2, result #base address of result
+	
+	li $t3, 0 #offset for result
+	
+	lw $t4, newSystem
+	
+	
+	loop:
+		beq $t1, $zero, end_loop
+	
+		div $t1, $t4  #number divided by newSystem
+	
+		mflo $t1 #quotient
+		mfhi $t5 #reminder to append in result
+	
+	
+		#convert reminder to char
+		bgt $t5, 9, convert_to_char
+		addi $t5, $t5, 48
+		j append_to_result
+	
+		convert_to_char:
+		addi $t5, $t5, 55
+	
+		append_to_result:
+		add $t6, $t2, $zero
+		add $t6, $t6, $t3
+		sb  $t5, 0($t6) 
+	
+		addi $t3, $t3, 1 #increment length
+	
+		j loop
+	
+	end_loop:
+		add $t6, $t2, $zero
+		add $t6, $t6, $t3
+		sb $zero, 0($t6) #terminate the string
+		add $a0, $t2, $zero
+		move $a1, $t3
+		j reverse_string
+		
+reverse_string:
+	move $t0, $a0 #result base addresss
+	move $t1, $a1 #length
+	li $t2, 0 # i start iterator
+	subi $t3, $t1, 1 #j end iterator
+	
+	reverse_loop:
+	
+		bge $t2, $t3, reverse_end #i>=j
+		
+		add $t4, $t0, $t2  #  index i  
+		add $t5, $t0, $t3  # index j
+		
+		lb $t6, 0($t4)  #store from memory to register 
+		lb $t7, 0($t5) #store from memory to register 
+		 
+		sb $t7, 0($t4)  #store from register to memory 
+		sb $t6, 0($t5)  #store from register to memory 
+		
+		#move i and j
+		addi $t2, $t2, 1
+		addi $t3, $t3, -1
+		j reverse_loop
+		
+	reverse_end:
+	jr $ra
+		
+		
+		
+		
+		
+	
+	
+	
+	
